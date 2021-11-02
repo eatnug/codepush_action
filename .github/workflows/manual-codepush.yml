@@ -64,8 +64,8 @@ jobs:
       - name: Check If Pushiable
         if: | 
           steps.cache-node.outputs.cache-hit != 'true'
-          && (steps.cached-hash.outputs.ios == steps.current-hash.outputs.ios 
-          || steps.cached-hash.outputs.android == steps.current-hash.outputs.android)
+          && (steps.cached-hash.outputs.ios != steps.current-hash.outputs.ios 
+          || steps.cached-hash.outputs.android != steps.current-hash.outputs.android)
         run: exit 1
       
       - name: push

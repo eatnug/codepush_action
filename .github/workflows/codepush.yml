@@ -1,0 +1,39 @@
+# This is a basic workflow to help you get started with Actions
+
+name: capture-native-spec
+
+# Controls when the workflow will run
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - master
+
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  codepush:
+    runs-on: ubuntu-latest
+    if: |
+      github.event.pull_request.merged
+      && (github.head_ref != 'develop'
+      || !startsWith(github.head_ref, 'release'))
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@v2.3.4
+
+      - name: Init node
+        uses: actions/setup-node@v2.4.1
+        with:
+          node-version: '14.17.6'
+
+      - name: Write npmrc
+        run: |
+          npm config set @pilltong-dev:registry=https://npm.pkg.github.com/
+          npm config set //npm.pkg.github.com/:_authToken=${{secrets.GIT_HUB_TOKEN}}  
+        
+      - name: Install Dependencies
+        run: yarn
+
+      - name: Push
+        run: echo push

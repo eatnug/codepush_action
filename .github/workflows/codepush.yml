@@ -16,8 +16,9 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       github.event.pull_request.merged
-      && (github.head_ref != 'develop'
-      || !startsWith(github.head_ref, 'release'))
+      && github.head_ref != 'develop'
+      && !startsWith(github.head_ref, 'release'))
+
     steps:
       - name: Checkout master
         uses: actions/checkout@v2.3.4
@@ -27,12 +28,25 @@ jobs:
         with:
           node-version: '14.17.6'
 
+      - name: Cache node modules
+        id: cache-node
+        uses: actions/cache@v2.1.6
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-
+
       - name: Write npmrc
+        if: steps.cache-node.outputs.cache-hit != 'true'
         run: |
           npm config set @pilltong-dev:registry=https://npm.pkg.github.com/
           npm config set //npm.pkg.github.com/:_authToken=${{secrets.GIT_HUB_TOKEN}}  
         
       - name: Install Dependencies
+        if: steps.cache-node.outputs.cache-hit != 'true'
         run: yarn
 
       - name: Push

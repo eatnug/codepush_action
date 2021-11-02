@@ -5,7 +5,7 @@ name: check-if-pushiable
 # Controls when the workflow will run
 on:
   pull_request:
-    types: [opened]
+    types: [opened, synchronize]
     branches:
       - master
 

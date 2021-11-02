@@ -8,6 +8,7 @@ on:
     types: [closed]
     branches:
       - not_now
+  workflow_dispatch:
 
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
@@ -15,9 +16,10 @@ jobs:
   codepush:
     runs-on: ubuntu-latest
     if: |
-      github.event.pull_request.merged
+      github.event.name == 'workflow_dispatch'
+      || (github.event.pull_request.merged
       && github.head_ref != 'develop'
-      && !startsWith(github.head_ref, 'release')
+      && !startsWith(github.head_ref, 'release'))
 
     steps:
       - name: Checkout master

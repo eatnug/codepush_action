@@ -1,22 +1,15 @@
 # This is a basic workflow to help you get started with Actions
 
-name: check-if-pushiable
+name: manual-codepush
 
 # Controls when the workflow will run
-on:
-  pull_request:
-    types: [opened, synchronize]
-    branches:
-      - not_now 
+on: workflow_dispatch
 
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   check-if-pushiable:
     runs-on: ubuntu-latest
-    if: |
-      github.head_ref != 'develop'
-      && !startsWith(github.head_ref, 'release')
     steps:
       - name: Checkout master
         uses: actions/checkout@v2.3.4
@@ -68,11 +61,12 @@ jobs:
           echo ::set-output name=ios::${{ hashFiles('node_modules/**/ios/**')}}
           echo ::set-output name=android::${{ hashFiles('node_modules/**/android/**')}}
 
-      - name: Check If No Native Change
-        if: steps.cache-node.outputs.cache-hit != 'true'
-        id: can-push
-        run: echo ::set-output name=result::${{ steps.cached-hash.outputs.ios == steps.current-hash.outputs.ios && steps.cached-hash.outputs.android == steps.current-hash.outputs.android }}
-
-      - name: Check If Dangerous
-        if: steps.can-push.outputs.result != 'true'
+      - name: Check If Pushiable
+        if: | 
+          steps.cache-node.outputs.cache-hit != 'true'
+          && (steps.cached-hash.outputs.ios == steps.current-hash.outputs.ios 
+          || steps.cached-hash.outputs.android == steps.current-hash.outputs.android)
         run: exit 1
+      
+      - name: push
+        run: echo push
